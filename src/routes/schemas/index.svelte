@@ -5,7 +5,7 @@
 		    body: JSON.stringify({method: "schema.index"})
 		}).then(r => r.json()).then(schemas => {
 		    schemas = schemas.result.items;
-		    return this.fetch('http://195.161.114.62:8118/api/jsonrpc', {
+		    return this.fetch('process.JSON_RPC__ENDPOINT', {
             		    method: 'POST',
             		    body: JSON.stringify({method: "transition.index"})
             		}).then(r => r.json()).then(transitions => {
