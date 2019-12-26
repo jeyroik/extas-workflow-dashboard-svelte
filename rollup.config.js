@@ -7,6 +7,7 @@ import { terser } from 'rollup-plugin-terser';
 import config from 'sapper/config/rollup.js';
 import pkg from './package.json';
 
+
 const mode = process.env.NODE_ENV;
 const dev = mode === 'development';
 const legacy = !!process.env.SAPPER_LEGACY_BUILD;
@@ -20,6 +21,7 @@ export default {
 		output: config.client.output(),
 		plugins: [
 			replace({
+				'process.JSON_RPC__ENDPOINT': process.env.JSON_RPC__ENDPOINT ,
 				'process.browser': true,
 				'process.env.NODE_ENV': JSON.stringify(mode)
 			}),
@@ -28,6 +30,7 @@ export default {
 				hydratable: true,
 				emitCss: true
 			}),
+
 			resolve({
 				browser: true,
 				dedupe
@@ -64,6 +67,7 @@ export default {
 		output: config.server.output(),
 		plugins: [
 			replace({
+               'process.JSON_RPC__ENDPOINT': process.env.JSON_RPC__ENDPOINT,
 				'process.browser': false,
 				'process.env.NODE_ENV': JSON.stringify(mode)
 			}),
@@ -89,6 +93,7 @@ export default {
 		plugins: [
 			resolve(),
 			replace({
+				'process.JSON_RPC__ENDPOINT': process.env.JSON_RPC__ENDPOINT,
 				'process.browser': true,
 				'process.env.NODE_ENV': JSON.stringify(mode)
 			}),
