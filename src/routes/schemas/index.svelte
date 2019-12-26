@@ -165,7 +165,6 @@ function openTransitionDispatcherTemplate(schema, transition, template) {
             s.transitions.forEach(t => {
                 if (t.name == transition.name) {
                     t.opened[template.name] = !t.opened[template.name];
-                    console.log('open template, transition:',t);
                 }
             })
         }
@@ -173,25 +172,21 @@ function openTransitionDispatcherTemplate(schema, transition, template) {
     schemas = schemas;
 }
 
-function clear(e) {
-    schemas.forEach(async function(el) {
-        if (el.name == e.toElement.name) {
-            jsonRpc(
-                {
-                    method: 'schema.delete',
-                    name: e.toElement.name
-                },
-                function (result) {
-                    let deleted = result.pop();
-                    M.toast({
-                        html: 'Схема "' + deleted.title + '" удалена',
-                        classes: 'green'
-                    });
-                    schemas = schemas.filter(t => t.name);
-                }
-            );
+function clear(schema) {
+    jsonRpc(
+        {
+            method: 'schema.delete',
+            name: schema.name
+        },
+        result => {
+            let deleted = result.pop();
+            M.toast({
+                html: 'Схема "' + deleted.title + '" удалена',
+                classes: 'green'
+            });
+            schemas = schemas.filter(t => t.name);
         }
-    });
+    );
 }
 
 async function create(schema) {
@@ -340,7 +335,6 @@ let modalSchema = {};
 let modalTransition = {};
 </script>
 
-
 <svelte:head>
 	<title>Workflow - Схемы</title>
 </svelte:head>
@@ -488,7 +482,7 @@ let modalTransition = {};
             {:else}
                 <Btn color="green" text="Сохранить" title="Сохранить" tooltip="top" name="{schema.name}" action="{e => save(schema)}"></Btn>
             {/if}
-            <Btn color="red" text="Х" title="Удалить" tooltip="top" name="{schema.name}" action="{clear}"></Btn>
+            <Btn color="red" text="Х" title="Удалить" tooltip="top" action="{e => clear(schema)}"></Btn>
         </div>
 	</li>
 {/each}

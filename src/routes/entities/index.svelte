@@ -29,57 +29,41 @@ function add() {
     entityTemplates = entityTemplates;
 }
 
-function addParam(e) {
-    entityTemplates.forEach(function(template) {
-        if (template.name == e.toElement.name) {
-            template.parameters.unshift({
-                name: '',
-                title: '',
-                description: ''
-            });
-        }
+function addParam(entityTemplate) {
+    entityTemplate.parameters.unshift({
+        name: '',
+        title: '',
+        description: ''
     });
 
     entityTemplates = entityTemplates;
 }
 
-function clear(e) {
-    entityTemplates.forEach(async function(el) {
-        if (el.name == e.toElement.name) {
-            jsonRpc(
-                {
-                    method: 'entity.template.delete',
-                    name: e.toElement.name
-                },
-                function (result) {
-                    el.name = '';
-                    let deleted = result.pop();
-                    M.toast({
-                        html: 'Шаблон "' + deleted.title + '" удалён',
-                        classes: 'green'
-                    });
-                    entityTemplates = entityTemplates.filter(t => t.name);
-                }
-            );
+function clear(entityTemplate) {
+    jsonRpc(
+        {
+            method: 'entity.template.delete',
+            name: entityTemplate.name
+        },
+        result => {
+            el.name = '';
+            let deleted = result.pop();
+            M.toast({
+                html: 'Шаблон "' + deleted.title + '" удалён',
+                classes: 'green'
+            });
+            entityTemplates = entityTemplates.filter(t => t.name);
         }
-    });
+    );
 }
 
-function clearParam(e) {
-    let names = e.toElement.name.split('@');
-    let templateName = names[0];
-    let paramName = names[1];
-
-    entityTemplates.forEach(function(el) {
-        if (el.name == templateName) {
-            el.parameters.forEach(function(param) {
-                if (param.name == paramName) {
-                    param.deleted = true;
-                }
-            })
-            el.parameters = el.parameters.filter(t => !t.deleted);
+function clearParam(entityTemplate, param) {
+    entityTemplate.parameters.forEach(p => {
+        if (p.name == param.name) {
+            p.deleted = true;
         }
-    });
+    })
+    entityTemplate.parameters = entityTemplate.parameters.filter(t => !t.deleted);
     entityTemplates = entityTemplates;
 }
 
@@ -97,7 +81,7 @@ function create (e) {
                       parameters: entityTemplate.parameters
                   }
                 },
-                function (result) {
+                result => {
                     M.toast({
                         html: 'Шаблон "' + result.title + '" создан',
                         classes: 'green'
@@ -110,39 +94,29 @@ function create (e) {
     });
 }
 
-function save(e) {
-    let entityTemplate;
-    entityTemplates.forEach(function(el) {
-        if (el.name == e.toElement.name) {
-            entityTemplate = el;
+function save(entityTemplate) {
+    jsonRpc(
+        {
+          method: 'entity.template.update',
+          data: {
+              name: entityTemplate.name,
+              title: entityTemplate.title,
+              description: entityTemplate.description,
+              class: entityTemplate.class,
+              parameters: entityTemplate.parameters
+          }
+        },
+        result => {
+            let tmpl = result.pop();
+            M.toast({
+                html: 'Шаблон "' + tmpl.title + '" обновлён',
+                classes: 'green'
+            });
+            entityTemplates = entityTemplates.filter(t => t.name);
         }
-    });
-
-    if (entityTemplate) {
-        jsonRpc(
-            {
-              method: 'entity.template.update',
-              data: {
-                  name: entityTemplate.name,
-                  title: entityTemplate.title,
-                  description: entityTemplate.description,
-                  class: entityTemplate.class,
-                  parameters: entityTemplate.parameters
-              }
-            },
-            function (result) {
-                let tmpl = result.pop();
-                M.toast({
-                    html: 'Шаблон "' + tmpl.title + '" обновлён',
-                    classes: 'green'
-                });
-                entityTemplates = entityTemplates.filter(t => t.name);
-            }
-        );
-    }
+    );
 }
 </script>
-
 
 <svelte:head>
 	<title>Workflow - Шаблоны сущностей</title>
@@ -180,7 +154,7 @@ function save(e) {
         </div>
 
         <div class="row">
-            <Btn color="blue" text="Создать параметр" title="Создать параметр" tooltip="top" name="{entityTemplate.name}" action="{addParam}"></Btn>
+            <Btn color="blue" text="Создать параметр" title="Создать параметр" tooltip="top" action="{e => addParam(entityTemplate)}"></Btn>
         </div>
 
         {#each entityTemplate.parameters as param}
@@ -198,7 +172,7 @@ function save(e) {
                     <span class="helper-text">Описание</span>
                 </div>
                 <div class="input-field col s3">
-                    <Btn color="red" text="Х" title="Удалить" tooltip="top" name="{entityTemplate.name}@{param.name}" action="{clearParam}"></Btn>
+                    <Btn color="red" text="Х" title="Удалить" tooltip="top" action="{e => clearParam(entityTemplate, param)}"></Btn>
                 </div>
             </div>
         {/each}
@@ -207,9 +181,9 @@ function save(e) {
             {#if entityTemplate.tmp}
                 <Btn color="green" text="Создать" title="Создать" tooltip="top" name="{entityTemplate.name}" action="{create}"></Btn>
             {:else}
-                <Btn color="green" text="Сохранить" title="Сохранить" tooltip="top" name="{entityTemplate.name}" action="{save}"></Btn>
+                <Btn color="green" text="Сохранить" title="Сохранить" tooltip="top" name="{entityTemplate.name}" action="{e => save(entityTemplate)}"></Btn>
             {/if}
-            <Btn color="red" text="Х" title="Удалить шаблон сущности" tooltip="top" name="{entityTemplate.name}" action="{clear}"></Btn>
+            <Btn color="red" text="Х" title="Удалить шаблон сущности" tooltip="top" name="{entityTemplate.name}" action="{e => clear(entityTemplate)}"></Btn>
         </div>
 	</li>
 {/each}
