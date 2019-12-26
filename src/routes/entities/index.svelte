@@ -64,7 +64,8 @@ function clearParam(entityTemplate, param) {
         }
     })
     entityTemplate.parameters = entityTemplate.parameters.filter(t => !t.deleted);
-    entityTemplates = entityTemplates;
+    save(entityTemplate);
+    //entityTemplates = entityTemplates;
 }
 
 function create (e) {
