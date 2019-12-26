@@ -12,7 +12,6 @@
     "test": "run-p --race dev cy:run"
   },
   "dependencies": {
-    "chota": "^0.7.1",
     "compression": "^1.7.1"
   },
   "devDependencies": {
